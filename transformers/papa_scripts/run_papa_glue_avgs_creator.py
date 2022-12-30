@@ -301,7 +301,7 @@ def main():
     # Some models have set the order of the labels to use, so let's make sure we do use it.
     label_to_id = None
     if (
-        model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id
+        model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id   # map from index (i.e., 0, 1 which is actually passed to model as truth labels) to corresponding actual labels (e.g., "Correct", "Incorrect", etc.)
         and args.task_name is not None
         and not is_regression
     ):
@@ -313,14 +313,14 @@ def main():
                 "Using it!"
             )
             label_to_id = {i: label_name_to_id[label_list[i]] for i in range(num_labels)}
-        else:
+        else:       # labels in model.config.label2id (i.e., specified in model's config file) are not the same as labels in label_list (labels in dataset), i.e. model is trained on a dataset with different labels
             logger.warning(
                 "Your model seems to have been trained with labels, but they don't match the dataset: ",
                 f"model labels: {list(sorted(label_name_to_id.keys()))}, dataset labels: {list(sorted(label_list))}."
                 "\nIgnoring the model labels as a result.",
             )
-    elif args.task_name is None:
-        label_to_id = {v: i for i, v in enumerate(label_list)}
+    elif args.task_name is None:    
+        label_to_id = {v: i for i, v in enumerate(label_list)}  
 
     if label_to_id is not None:
         model.config.label2id = label_to_id
@@ -332,20 +332,26 @@ def main():
     padding = "max_length" if args.pad_to_max_length else False
 
     def add_preprocess_func(result):
-        input_ids = result.data['input_ids']
-        att_mask = result.data['attention_mask']
+        input_ids = result.data['input_ids']        # input_ids is a list of token ids (nos. assigned to each token in vocabulary)
+        att_mask = result.data['attention_mask']    # att_mask is a list of 1s and 0s, where 1s indicate the position of tokens in input_ids and 0s indicate the position of padding tokens
         max_seq_length = args.max_length
-
+        
+        # pad_token_id is the id of the padding token in the vocabulary (must be different from the id of the [CLS],[SEP] tokens and valid tokens in the vocabulary)
         new_input_ids = [[tokenizer.pad_token_id] * max_seq_length for i in range(len(input_ids))]
-        new_att_mask = [[0] * max_seq_length for i in range(len(input_ids))]
+        new_att_mask = [[0] * max_seq_length for i in range(len(input_ids))]            # since pad tokens must be ignored, corresponding att_mask values must be 0s
         for i, cur_input_ids, cur_att_mask in zip(range(len(input_ids)), input_ids, att_mask):
+            # Find the first and last occurrences of separator token [SEP] (which separates two sentences in input)
             first_sep_index = cur_input_ids.index(tokenizer.sep_token_id)
             last_sep_index = len(cur_input_ids) - list(reversed(cur_input_ids)).index(tokenizer.sep_token_id) - 1
 
-            for j in range(min(first_sep_index, max_seq_length // 2)):
+            # Till the 1st separator occurence, the new input ids are the same as orig input ids
+            for j in range(min(first_sep_index, max_seq_length // 2)):  
                 new_input_ids[i][j] = cur_input_ids[j]
                 new_att_mask[i][j] = 1
 
+            # After the 1st line ends (pos of 1st sep), add padding (using padding tokens) as much as needed to fit the rest of input ids in the space that's left
+            # Basically, instead of padding at the end of sentence, padding is done b/w 1st and 2nd sentence (centered padding)
+            ######## BUT WHY ????
             for j in range(first_sep_index, last_sep_index):
                 if max_seq_length // 2 + j - first_sep_index == len(new_input_ids[i]) - 1:
                     break
@@ -364,10 +370,10 @@ def main():
         texts = (
             (examples[sentence1_key],) if sentence2_key is None else (examples[sentence1_key], examples[sentence2_key])
         )
-        result = tokenizer(*texts, padding=padding, max_length=args.max_length, truncation=True)
+        result = tokenizer(*texts, padding=padding, max_length=args.max_length, truncation=True)    # Here, default padding (at end) is used
 
         if args.use_papa_preprocess:
-            add_preprocess_func(result)
+            add_preprocess_func(result)         # use the special centered padding 
 
         if "label" in examples:
             if label_to_id is not None:
@@ -378,6 +384,7 @@ def main():
                 result["labels"] = examples["label"]
         return result
 
+    # process raw datasets by applying preprocess function
     with accelerator.main_process_first():
         processed_datasets = raw_datasets.map(
             preprocess_function,
@@ -388,7 +395,7 @@ def main():
         )
 
     train_dataset = processed_datasets["train"]
-    eval_dataset = processed_datasets["validation_matched" if args.task_name == "mnli" else "validation"]
+    eval_dataset = processed_datasets["validation_matched" if args.task_name == "mnli" else "validation"]   # bcoz only mnli has two types of val sets - "validaion_matched" and "validation_mismatched"
 
     # Log a few random samples from the training set:
     for index in random.sample(range(len(train_dataset)), 3):
@@ -396,7 +403,7 @@ def main():
 
     # DataLoaders creation:
     if args.pad_to_max_length:
-        # If padding was already done ot max length, we use the default data collator that will just convert everything
+        # If padding was already done at max length, we use the default data collator that will just convert everything
         # to tensors.
         data_collator = default_data_collator
     else:
