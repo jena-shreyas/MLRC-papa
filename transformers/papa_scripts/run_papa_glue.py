@@ -406,9 +406,10 @@ def main():
     if int(model_args.sort_calculating) + int(model_args.grad_for_classifier_only) + int(model_args.grad_for_classifier_and_static_only) > 1:
         raise Exception("Just one frozen gradients type is allowed")
 
-    if model_args.sort_calculating:
+    if model_args.sort_calculating: # if parameter name does not satisfy the conditions, it is a frozen parameter and does not need to be updated in the subsequent trainig steps
         for param_name, param in list(model.named_parameters()):
-            if param_name.startswith("classifier") or "pooler" in param_name or 'lambdas' in param_name:
+            # these parameters are added for probing purpsoes and hence need not be trained, but parameters to be kept frozen
+            if param_name.startswith("classifier") or "pooler" in param_name or 'lambdas' in param_name: # lambdas is the lamdas of eqn 3 of page 3 of paper
                 print("Not frozen param: ", param_name)
                 continue
             param.requires_grad = False

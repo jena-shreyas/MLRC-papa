@@ -58,3 +58,6 @@ done
 ```
 
 To perform the same analysis with token-classification tasks use the scripts [run_papa_ner.py](https://github.com/schwartz-lab-NLP/papa/blob/main/transformers/papa_scripts/run_papa_ner.py) instead of [run_papa_glue.py](https://github.com/schwartz-lab-NLP/papa/blob/main/transformers/papa_scripts/run_papa_glue.py) and [run_papa_ner_avgs_creator.py](https://github.com/schwartz-lab-NLP/papa/blob/main/transformers/papa_scripts/run_papa_ner_avgs_creator.py) instead of [run_papa_glue_avgs_creator.py](https://github.com/schwartz-lab-NLP/papa/blob/main/transformers/papa_scripts/run_papa_glue_avgs_creator.py).
+
+
+## pos code where???
