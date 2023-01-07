@@ -59,5 +59,9 @@ done
 
 To perform the same analysis with token-classification tasks use the scripts [run_papa_ner.py](https://github.com/schwartz-lab-NLP/papa/blob/main/transformers/papa_scripts/run_papa_ner.py) instead of [run_papa_glue.py](https://github.com/schwartz-lab-NLP/papa/blob/main/transformers/papa_scripts/run_papa_glue.py) and [run_papa_ner_avgs_creator.py](https://github.com/schwartz-lab-NLP/papa/blob/main/transformers/papa_scripts/run_papa_ner_avgs_creator.py) instead of [run_papa_glue_avgs_creator.py](https://github.com/schwartz-lab-NLP/papa/blob/main/transformers/papa_scripts/run_papa_glue_avgs_creator.py).
 
+## Notes:
 
-## pos code where???
+## 1. pos code where???
+ 2. # two modes of running, when sort calculating is true, the model is learnt with lambdas, classifier and pooling as parameters, the learnt lambdas are sorted and saved somewhere
+    # when static_heads_num > 0, that number of attnetion heads with least effect on performane of the model (according to sorted lambda values) are replaced, AND THEN CLASSIFIER (which is a final fully connected layer at the top of the model), is learnt according to the task 
+    # learning the classifier is required, since some attention matrices have changed now

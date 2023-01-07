@@ -1571,7 +1571,7 @@ class BertForSequenceClassification(BertPreTrainedModel):
             config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
         )
         self.dropout = nn.Dropout(classifier_dropout)
-        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels) # final fully connected layer for classification, task dependent, not frozen layer to be learnt when running run_papa_glue
 
         # Initialize weights and apply final processing
         self.post_init()

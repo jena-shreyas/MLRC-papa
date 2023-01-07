@@ -378,6 +378,9 @@ def main():
     )
     config.use_freeze_extract_pooler = model_args.use_freeze_extract_pooler
     config.max_seq_length = data_args.max_seq_length
+    # two modes of running, when sort calculating is true, the model is learnt with lambdas, classifier and pooling as parameters, the learnt lambdas are sorted and saved somewhere
+    # when static_heads_num > 0, that number of attnetion heads with least effect on performane of the model (according to sorted lambda values) are replaced, AND THEN CLASSIFIER (which is a final fully connected layer at the top of the model), is learnt according to the task 
+    # learning the classifier is required, since some attention matrices have changed now
     if model_args.static_heads_num > 0:
         config.static_heads = {'heads_dir': model_args.static_heads_dir}
         config.static_heads['heads'] = papa_modules.get_sorting_heads_dict(model_args.sorting_heads_dir, model_args.static_heads_num)
