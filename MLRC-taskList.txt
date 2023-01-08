@@ -1,0 +1,58 @@
+1. Text Classification
+	a. GLUE: MNLI, SST-2, MRPC, CoLA
+2. Structured Text Prediction Tasks
+	a. NER
+	b. POS (CoNLL-2003 Shared Task)
+	
+ACC: SST2, MNLI (mismatched validation split)
+F1: MRPC (results comparable to original models), NER, POS
+MCC: CoLA
+
+_______________________________________________
+
+- papa uses the standard train/val split (can study effect of this factor)
+- BERT, RoBERTa, DeBARTa (both BASE and LARGE)
+	generate the constant attention matrices using the given training set(unlabelled) of the task 
+	* show that PAPA is not very sensitive to specific training sets being used (?)
+	* 3 different random seeds
+- experiment for PROBING:
+	a. replace [1,0.5,0.125,0.0625,0] of the input-dependent attn. mat. with constant attn. mat.
+	b. CLAIM: DeBerta<Roberta<BERT (order of performance decrease) for each of the above experiments, tasks and model sizes.
+	c. CLAIM: model ranking is consistent with the standard fine-tuning setup (?)
+
+____________________________________________________
+
+RESULTS AND CLAIMS:
+
+1. Replacing all attention matrices with constant ones incurs a modest performance drop - claims that there is an avg. drop of 8% and the drop is not more than 20% from the original model.
+2. Strong Performing PLMs use their attention capabilities more (?)
+	- results in the paper are shown only for replacing all the matrices with constant matrices
+	- we can do the same for the other ratios **
+3. Replacing half of the attention matrices does not cause any drop in performance.
+	** claims that the performance increases in the case of deberta-large and bert-base
+4. Performance models rely more on attention
+	- what is performance avg. across the tasks given (how to calc.?)
+_______________________________________________________
+
+Further Analysis: (using RoBERTa-BASE and LARGE, we can try with other models**)
+
+1. patterns of the constant matrices returned by PAPA
+2. other alternatives to generating constant matrices
+3. whether the constant matrices are data-dependent
+4. alternative methods for selecting which attn. heads to replace
+5. MLM results and discuss challenges in representing them
+
+______________________________________________________
+
+1. Run the experiments for the section 5.1, 5.2 (ask Adarsh) -lots of experiments involved 
+2. Reproduce the ablation study based on different constant matrices
+3. Probe task performance result analysis (table - 2)
+4. no graph is given for alternative head selection methods and mlm task perplexity.
+5. also used ELECTRA-BASE and analysis of the results.
+6. analysis of attention patterns, and pruning methods
+7. Results might vary for other languages (try on low resource languages**)
+________________________________________________________
+
+
+TASK1: run and generate the initial results on GLUE and NER 
+TASK2: run and generate the results on POS 
